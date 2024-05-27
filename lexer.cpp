@@ -83,43 +83,44 @@ std::string enumToString(Token token) {
 
 // Mapeamento de strings para tokens
 std::unordered_map<std::string, Token> keywords = {
-    {"=-=", Token::IGUAL},
-    {"=!=", Token::DIFERENTE},
-    {">=", Token::MAIOR_IGUAL},
-    {"=<<=", Token::MENOR_IGUAL},
-    {"=||=", Token::OU},
-    {"*.*", Token::MULTIPLICAR},
-    {"*+*", Token::SOMAR},
-    {"*++*", Token::INCREMENTAR},
-    {"*--*", Token::DECREMENTAR},
-    {"*-*", Token::SUBTRAIR},
-    {"*/*", Token::DIVIDIR},
-    {"@:!", Token::INICIO_PROGRAMA},
-    {"%:!", Token::FIM_PROGRAMA},
-    {"{", Token::INICIO_BLOCO},
-    {"}", Token::FIM_BLOCO},
-    {";", Token::FIM_COMANDO},
-    {"*>>*", Token::ATRIBUIR},
-    {"def:", Token::PALAVRA_RESERVADA},
-    {"super:def", Token::PALAVRA_RESERVADA},
-    {"yeet", Token::PALAVRA_RESERVADA},
-    {"i:", Token::PALAVRA_RESERVADA},
-    {"e:", Token::PALAVRA_RESERVADA},
-    {"ie:", Token::PALAVRA_RESERVADA},
-    {"w:", Token::PALAVRA_RESERVADA},
-    {"f:", Token::PALAVRA_RESERVADA},
-    {"read:", Token::PALAVRA_RESERVADA},
-    {"put::", Token::PALAVRA_RESERVADA},
-    {"int", Token::TIPAGEM},
-    {"float", Token::TIPAGEM},
-    {"boolean", Token::TIPAGEM},
-    {"string", Token::TIPAGEM},
-    {"char", Token::TIPAGEM}
+        {"=-=", Token::IGUAL},
+        {"=!=", Token::DIFERENTE},
+        {">=", Token::MAIOR_IGUAL},
+        {"=<<=", Token::MENOR_IGUAL},
+        {"=||=", Token::OU},
+        {"*.*", Token::MULTIPLICAR},
+        {"*+*", Token::SOMAR},
+        {"*++*", Token::INCREMENTAR},
+        {"*--*", Token::DECREMENTAR},
+        {"*-*", Token::SUBTRAIR},
+        {"*/*", Token::DIVIDIR},
+        {"@:!", Token::INICIO_PROGRAMA},
+        {"%:!", Token::FIM_PROGRAMA},
+        {"{", Token::INICIO_BLOCO},
+        {"}", Token::FIM_BLOCO},
+        {";", Token::FIM_COMANDO},
+        {"*>>*", Token::ATRIBUIR},
+        {"def:", Token::PALAVRA_RESERVADA},
+        {"super:def", Token::PALAVRA_RESERVADA},
+        {"yeet", Token::PALAVRA_RESERVADA},
+        {"i:", Token::CONDICIONAL_SE},
+        {"e:", Token::CONDICIONAL_SENAO},
+        {"ie:", Token::CONDICIONAL_SENAOSE},
+        {"w:", Token::LACO_ENQUANTO},
+        {"f:", Token::LACO_PARA},
+        {"read:", Token::ENTRADA_DADOS},
+        {"put::", Token::SAIDA_DADOS},
+        {"int", Token::TIPAGEM},
+        {"float", Token::TIPAGEM},
+        {"boolean", Token::TIPAGEM},
+        {"string", Token::TIPAGEM},
+        {"char", Token::TIPAGEM},
+        {"void", Token::TIPAGEM}
 };
 
 // Função para verificar se uma string é um identificador válido
 bool isIdentifier(const std::string& str) {
-    if (!std::isalpha(str[0]))
+    if (str.empty() || !std::isalpha(str[0]))
         return false;
     for (char c : str) {
         if (!std::isalnum(c) && c != '_')
@@ -130,6 +131,8 @@ bool isIdentifier(const std::string& str) {
 
 // Função para verificar se uma string é um número válido
 bool isNumber(const std::string& str) {
+    if (str.empty())
+        return false;
     for (char c : str) {
         if (!std::isdigit(c))
             return false;
@@ -139,10 +142,8 @@ bool isNumber(const std::string& str) {
 
 // Função para analisar uma linha de entrada
 void analyzeLine(const std::string& line) {
-    int errors = 0;
     std::stringstream ss(line);
     std::string token;
-    char prevChar = ' ';
 
     while (ss >> token) {
         // Verificar se o token é uma palavra reservada
@@ -180,9 +181,15 @@ void analyzeLine(const std::string& line) {
             break; // Comentário engole o resto da linha
         }
 
-        // Se chegou aqui, o token é desconhecido
-        std::cerr << "Erro léxico: token desconhecido -> " << token << std::endl;
-        break;
+        // Separar tokens compostos como "fibonacci(int" em "fibonacci" e "("
+        for (char& ch : token) {
+            std::string singleChar(1, ch);
+            if (std::ispunct(ch) && singleChar != "_") {
+                std::cout << "Símbolo: " << singleChar << std::endl;
+            } else {
+                std::cerr << "Erro léxico: token desconhecido -> " << singleChar << std::endl;
+            }
+        }
     }
 }
 
@@ -201,4 +208,3 @@ int main() {
     inputFile.close();
     return 0;
 }
-
