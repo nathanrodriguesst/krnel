@@ -4,7 +4,6 @@
 #include <string>
 #include <cctype>
 #include <unordered_map>
-#include <vector>
 
 // Enumeração para representar os tokens
 enum class Token {
@@ -39,6 +38,7 @@ enum class Token {
     NUMERO,
     COMENTARIO,
     TIPAGEM,
+    LITERAL,
     DESCONHECIDO
 };
 
@@ -76,6 +76,7 @@ std::string enumToString(Token token) {
         case Token::NUMERO: return "NUMERO";
         case Token::COMENTARIO: return "COMENTARIO";
         case Token::TIPAGEM: return "TIPAGEM";
+        case Token::LITERAL: return "LITERAL";
         case Token::DESCONHECIDO: return "DESCONHECIDO";
     }
     return "DESCONHECIDO";
@@ -126,6 +127,7 @@ bool isIdentifier(const std::string& str) {
         if (!std::isalnum(c) && c != '_')
             return false;
     }
+
     return true;
 }
 
@@ -140,9 +142,25 @@ bool isNumber(const std::string& str) {
     return true;
 }
 
+// Função para separar símbolos dos tokens compostos
+std::string separateSymbols(const std::string& line) {
+    std::string result;
+    for (char ch : line) {
+        if (std::ispunct(ch) && ch != '_' && ch != '#' && ch != ':' && ch != '"') {
+            result += ' ';
+            result += ch;
+            result += ' ';
+        } else {
+            result += ch;
+        }
+    }
+    return result;
+}
+
 // Função para analisar uma linha de entrada
 void analyzeLine(const std::string& line) {
-    std::stringstream ss(line);
+    std::string separatedLine = separateSymbols(line);
+    std::stringstream ss(separatedLine);
     std::string token;
 
     while (ss >> token) {
@@ -181,7 +199,7 @@ void analyzeLine(const std::string& line) {
             break; // Comentário engole o resto da linha
         }
 
-        // Separar tokens compostos como "fibonacci(int" em "fibonacci" e "("
+        // Separar tokens compostos
         for (char& ch : token) {
             std::string singleChar(1, ch);
             if (std::ispunct(ch) && singleChar != "_") {
@@ -199,6 +217,8 @@ int main() {
         std::cerr << "Erro ao abrir o arquivo de entrada.\n";
         return 1;
     }
+
+    std::cout << "[TOKENS]\n";
 
     std::string line;
     while (std::getline(inputFile, line)) {
