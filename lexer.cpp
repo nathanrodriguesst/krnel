@@ -4,119 +4,49 @@
 #include <string>
 #include <cctype>
 #include <unordered_map>
-
-// Enumeração para representar os tokens
-enum class Token {
-    IGUAL,
-    DIFERENTE,
-    MAIOR,
-    MAIOR_IGUAL,
-    MENOR,
-    MENOR_IGUAL,
-    OU,
-    MULTIPLICAR,
-    SOMAR,
-    INCREMENTAR,
-    DECREMENTAR,
-    SUBTRAIR,
-    DIVIDIR,
-    INICIO_PROGRAMA,
-    FIM_PROGRAMA,
-    INICIO_BLOCO,
-    FIM_BLOCO,
-    FIM_COMANDO,
-    ATRIBUIR,
-    CONDICIONAL_SE,
-    CONDICIONAL_SENAO,
-    CONDICIONAL_SENAOSE,
-    LACO_ENQUANTO,
-    LACO_PARA,
-    ENTRADA_DADOS,
-    SAIDA_DADOS,
-    PALAVRA_RESERVADA,
-    IDENTIFICADOR,
-    NUMERO,
-    COMENTARIO,
-    TIPAGEM,
-    LITERAL,
-    DESCONHECIDO
-};
-
-// Função para converter um enum para string
-std::string enumToString(Token token) {
-    switch (token) {
-        case Token::IGUAL: return "IGUAL";
-        case Token::DIFERENTE: return "DIFERENTE";
-        case Token::MAIOR: return "MAIOR";
-        case Token::MAIOR_IGUAL: return "MAIOR_IGUAL";
-        case Token::MENOR: return "MENOR";
-        case Token::MENOR_IGUAL: return "MENOR_IGUAL";
-        case Token::OU: return "OU";
-        case Token::MULTIPLICAR: return "MULTIPLICAR";
-        case Token::SOMAR: return "SOMAR";
-        case Token::INCREMENTAR: return "INCREMENTAR";
-        case Token::DECREMENTAR: return "DECREMENTAR";
-        case Token::SUBTRAIR: return "SUBTRAIR";
-        case Token::DIVIDIR: return "DIVIDIR";
-        case Token::INICIO_PROGRAMA: return "INICIO_PROGRAMA";
-        case Token::FIM_PROGRAMA: return "FIM_PROGRAMA";
-        case Token::INICIO_BLOCO: return "INICIO_BLOCO";
-        case Token::FIM_BLOCO: return "FIM_BLOCO";
-        case Token::FIM_COMANDO: return "FIM_COMANDO";
-        case Token::ATRIBUIR: return "ATRIBUIR";
-        case Token::CONDICIONAL_SE: return "CONDICIONAL_SE";
-        case Token::CONDICIONAL_SENAO: return "CONDICIONAL_SENAO";
-        case Token::CONDICIONAL_SENAOSE: return "CONDICIONAL_SENAOSE";
-        case Token::LACO_ENQUANTO: return "LACO_ENQUANTO";
-        case Token::LACO_PARA: return "LACO_PARA";
-        case Token::ENTRADA_DADOS: return "ENTRADA_DADOS";
-        case Token::SAIDA_DADOS: return "SAIDA_DADOS";
-        case Token::PALAVRA_RESERVADA: return "PALAVRA_RESERVADA";
-        case Token::IDENTIFICADOR: return "IDENTIFICADOR";
-        case Token::NUMERO: return "NUMERO";
-        case Token::COMENTARIO: return "COMENTARIO";
-        case Token::TIPAGEM: return "TIPAGEM";
-        case Token::LITERAL: return "LITERAL";
-        case Token::DESCONHECIDO: return "DESCONHECIDO";
-    }
-    return "DESCONHECIDO";
-}
+#include <unordered_set>
 
 // Mapeamento de strings para tokens
-std::unordered_map<std::string, Token> keywords = {
-        {"=-=", Token::IGUAL},
-        {"=!=", Token::DIFERENTE},
-        {">=", Token::MAIOR_IGUAL},
-        {"=<<=", Token::MENOR_IGUAL},
-        {"=||=", Token::OU},
-        {"*.*", Token::MULTIPLICAR},
-        {"*+*", Token::SOMAR},
-        {"*++*", Token::INCREMENTAR},
-        {"*--*", Token::DECREMENTAR},
-        {"*-*", Token::SUBTRAIR},
-        {"*/*", Token::DIVIDIR},
-        {"@:!", Token::INICIO_PROGRAMA},
-        {"%:!", Token::FIM_PROGRAMA},
-        {"{", Token::INICIO_BLOCO},
-        {"}", Token::FIM_BLOCO},
-        {";", Token::FIM_COMANDO},
-        {"*>>*", Token::ATRIBUIR},
-        {"def:", Token::PALAVRA_RESERVADA},
-        {"super:def", Token::PALAVRA_RESERVADA},
-        {"yeet", Token::PALAVRA_RESERVADA},
-        {"i:", Token::CONDICIONAL_SE},
-        {"e:", Token::CONDICIONAL_SENAO},
-        {"ie:", Token::CONDICIONAL_SENAOSE},
-        {"w:", Token::LACO_ENQUANTO},
-        {"f:", Token::LACO_PARA},
-        {"read:", Token::ENTRADA_DADOS},
-        {"put::", Token::SAIDA_DADOS},
-        {"int", Token::TIPAGEM},
-        {"float", Token::TIPAGEM},
-        {"boolean", Token::TIPAGEM},
-        {"string", Token::TIPAGEM},
-        {"char", Token::TIPAGEM},
-        {"void", Token::TIPAGEM}
+std::unordered_map<std::string, std::string> keywords = {
+        {"def:", "DEFINICAO_VARIAVEL"},
+        {"super:def", "DEFINICAO_FUNCAO"},
+        {"yeet", "RETORNO"},
+        {"i:", "CONDICIONAL_SE"},
+        {"e:", "CONDICIONAL_SENAO"},
+        {"ie:", "CONDICIONAL_SENAOSE"},
+        {"w:", "LACO_ENQUANTO"},
+        {"f:", "LACO_PARA"},
+        {"read:", "ENTRADA_DADOS"},
+        {"put::", "SAIDA_DADOS"},
+        {"int", "TIPAGEM"},
+        {"float", "TIPAGEM"},
+        {"boolean", "TIPAGEM"},
+        {"string", "TIPAGEM"},
+        {"char", "TIPAGEM"},
+        {"void", "TIPAGEM"}
+};
+
+std::unordered_map<std::string, std::string> operators = {
+        {"=-=", "IGUAL"},
+        {"=!=", "DIFERENTE"},
+        {">=", "MAIOR_IGUAL"},
+        {"=<<=", "MENOR_IGUAL"},
+        {"=||=", "OU"},
+        {"*.*", "MULTIPLICAR"},
+        {"*+*", "SOMAR"},
+        {"*++*", "INCREMENTAR"},
+        {"*--*", "DECREMENTAR"},
+        {"*-*", "SUBTRAIR"},
+        {"*/*", "DIVIDIR"},
+};
+
+std::unordered_map<std::string, std::string> symbols = {
+        {"@:!", "INICIO_PROGRAMA"},
+        {"%:!", "FIM_PROGRAMA"},
+        {"{", "INICIO_BLOCO"},
+        {"}", "FIM_BLOCO"},
+        {";", "FIM_COMANDO"},
+        {"*>>*", "ATRIBUIR"},
 };
 
 // Função para verificar se uma string é um identificador válido
@@ -131,22 +61,45 @@ bool isIdentifier(const std::string& str) {
     return true;
 }
 
-// Função para verificar se uma string é um número válido
+// Verificar se uma string é um número inteiro ou float válido
 bool isNumber(const std::string& str) {
     if (str.empty())
         return false;
-    for (char c : str) {
-        if (!std::isdigit(c))
+
+    bool hasDecimalPoint = false;
+    size_t start = 0;
+
+    // Allow for an initial + or - sign
+    if (str[0] == '+' || str[0] == '-') {
+        start = 1;
+        if (str.size() == 1)  // String with only + or - is not a number
             return false;
     }
+
+    for (size_t i = start; i < str.size(); ++i) {
+        if (str[i] == '.') {
+            if (hasDecimalPoint)  // More than one decimal point is not allowed
+                return false;
+            hasDecimalPoint = true;
+        } else if (!std::isdigit(str[i])) {
+            return false;
+        }
+    }
+
+    // Ensure the string is not just a decimal point
+    if (str.size() == 1 && str == ".")
+        return false;
+
     return true;
 }
 
 // Função para separar símbolos dos tokens compostos
 std::string separateSymbols(const std::string& line) {
+    std::unordered_set<char> specialPunctuation = {'(', ')', '{', '}', ';', '#'};
     std::string result;
+
     for (char ch : line) {
-        if (std::ispunct(ch) && ch != '_' && ch != '#' && ch != ':' && ch != '"') {
+        if (std::ispunct(ch) && ch != '"' && specialPunctuation.count(ch)) {
             result += ' ';
             result += ch;
             result += ' ';
@@ -154,77 +107,108 @@ std::string separateSymbols(const std::string& line) {
             result += ch;
         }
     }
+
     return result;
 }
 
-// Função para analisar uma linha de entrada
-void analyzeLine(const std::string& line) {
+void analyzeLine(const std::string& line, std::ofstream& outfile) {
     std::string separatedLine = separateSymbols(line);
     std::stringstream ss(separatedLine);
     std::string token;
 
     while (ss >> token) {
+        // Verificar se é um literal
+        if (token.front() == '"') {
+            std::string literal = token;
+
+            while (literal.back() != '"') {
+                std::string nextPart;
+                ss >> nextPart;
+                literal += " " + nextPart;
+            }
+
+            token = literal;
+            outfile << R"({"type": "STRING_LITERAL", "value": ")" << token << R"("},)" << std::endl;
+            continue;
+        }
+
         // Verificar se o token é uma palavra reservada
-        auto it = keywords.find(token);
-        if (it != keywords.end()) {
-            Token tokenType = it->second;
-            std::cout << "Palavra reservada: " << token << " [" << enumToString(tokenType) << "]" << std::endl;
+        auto itKeyworkds = keywords.find(token);
+        if (itKeyworkds != keywords.end()) {
+            std::string tokenType = itKeyworkds->second;
+            outfile << "Palavra reservada: " << token << " [" << tokenType << "]" << std::endl;
+            continue;
+        }
+
+        auto itOperators = operators.find(token);
+        if (itOperators != operators.end()) {
+            std::string tokenType = itOperators->second;
+            outfile << "Operador: " << token << " [" << tokenType << "]" << std::endl;
+            continue;
+        }
+
+        auto itSymbols = symbols.find(token);
+        if (itSymbols != symbols.end()) {
+            std::string tokenType = itSymbols->second;
+            outfile << "Simbolo: " << token << " [" << tokenType << "]" << std::endl;
             continue;
         }
 
         // Verificar se o token é um número
         if (isNumber(token)) {
-            std::cout << "Número: " << token << std::endl;
+            outfile << "Número: " << token << std::endl;
             continue;
         }
 
         // Verificar se o token é um identificador
         if (isIdentifier(token)) {
-            std::cout << "Identificador: " << token << std::endl;
-            continue;
-        }
-
-        // Verificar se o token é um símbolo
-        if (token.size() == 1 && !std::isalnum(token[0])) {
-            std::cout << "Símbolo: " << token << std::endl;
+            outfile << "Identificador: " << token << std::endl;
             continue;
         }
 
         // Verificar se o token é um comentário
         if (token == "#") {
-            std::cout << "Comentário: ";
             std::string comment;
             std::getline(ss, comment);
-            std::cout << comment << std::endl;
+            outfile << "Comentário:" << comment << std::endl;
             break; // Comentário engole o resto da linha
-        }
-
-        // Separar tokens compostos
-        for (char& ch : token) {
-            std::string singleChar(1, ch);
-            if (std::ispunct(ch) && singleChar != "_") {
-                std::cout << "Símbolo: " << singleChar << std::endl;
-            } else {
-                std::cerr << "Erro léxico: token desconhecido -> " << singleChar << std::endl;
-            }
         }
     }
 }
 
 int main() {
-    std::ifstream inputFile("input.txt");
+    std::string fileName;
+
+    std::cout << "Digite o nome do arquivo de entrada: ";
+    std::cin >> fileName;
+
+    // Abre arquivo de entrada
+    std::ifstream inputFile(fileName);
     if (!inputFile.is_open()) {
         std::cerr << "Erro ao abrir o arquivo de entrada.\n";
         return 1;
     }
 
-    std::cout << "[TOKENS]\n";
+    // Abre arquivo de saída
+    std::ofstream outfile(fileName + ".krn");
+    if (!outfile.is_open()) {
+        std::cerr << "Erro ao abrir o arquivo de saída.\n";
+        return 1;
+    }
+
+    std::cout << "[INICIANDO LEITURA DOS TOKENS]\n";
+    outfile << "[\n";
 
     std::string line;
     while (std::getline(inputFile, line)) {
-        analyzeLine(line);
+        std::cout << line << "\n";
+        analyzeLine(line, outfile);
     }
 
+    std::cout << "[LEITURA FINALIZADA]\n";
+    outfile << "\n]";
+
     inputFile.close();
+    outfile.close();
     return 0;
 }
