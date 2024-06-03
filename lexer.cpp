@@ -89,6 +89,7 @@ bool isNumber(const std::string& str) {
 }
 
 std::string separateSymbols(const std::string& line) {
+    // Set of symbols that should be separated
     std::unordered_set<char> specialPunctuation = {'(', ')', '{', '}', ';', '#'};
     std::string result;
 
