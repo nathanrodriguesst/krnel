@@ -71,13 +71,6 @@ bool isNumber(const std::string& str) {
     bool hasDecimalPoint = false;
     size_t start = 0;
 
-    // Allow for an initial + or - sign
-    if (str[0] == '+' || str[0] == '-') {
-        start = 1;
-        if (str.size() == 1)  // String with only + or - is not a number
-            return false;
-    }
-
     for (size_t i = start; i < str.size(); ++i) {
         if (str[i] == '.') {
             if (hasDecimalPoint)  // More than one decimal point is not allowed
@@ -120,9 +113,9 @@ std::string formatOutput(const std::string& type, const std::string& value) {
                             .append(R"(", "value": ")")
                                 .append(value).append("\"}");
 
-    if (value != "%:!") {
+    if (value != "%:!")
         formattedOutput.append(",").append("\n");
-    }
+
 
     return formattedOutput;
 }
