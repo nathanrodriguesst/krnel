@@ -16,6 +16,7 @@ super:def int fibonacci(int n): {
     }
 }
 
+#this is a comment
 super:def void main(): {
     def: int num;
 
