@@ -13,7 +13,7 @@ Esse analisador tem como objetivo verificar os tokens de um arquivo de entrada e
 
 ## Utilização
 
-  1. Tenha o arquivo para ser analisado no diretório do executável
-  2. Após executar, aparecerá um prompt solicitando o nome do arquivo
-  3. Finalizando a análise, o programa retorna no terminal se obteve sucesso
+  1. Tenha o arquivo para ser analisado no diretório do executável;
+  2. Após executar, aparecerá um prompt solicitando o nome do arquivo;
+  3. Finalizando a análise, o programa retorna no terminal se obteve sucesso;
   4. Um arquivo de output com extensão .krn será criado no diretório do executável.
