@@ -55,34 +55,34 @@ std::unordered_map<std::string, std::string> symbols = {
         {"*>>*", "ASSIGN"},
 };
 
-bool isIdentifier(const std::string& str) {
-    if (str.empty() || !std::isalpha(str[0]))
+bool isIdentifier(const std::string& token) {
+    if (token.empty() || !std::isalpha(token[0]))
         return false;
 
-    return std::all_of(str.begin(), str.end(), [](char c) {
+    return std::all_of(token.begin(), token.end(), [](char c) {
         return std::isalnum(c) || c == '_';
     });
 }
 
-bool isNumber(const std::string& str) {
-    if (str.empty())
+bool isNumber(const std::string& token) {
+    if (token.empty())
         return false;
 
     bool hasDecimalPoint = false;
     size_t start = 0;
 
-    for (size_t i = start; i < str.size(); ++i) {
-        if (str[i] == '.') {
+    for (size_t i = start; i < token.size(); ++i) {
+        if (token[i] == '.') {
             if (hasDecimalPoint)  // More than one decimal point is not allowed
                 return false;
             hasDecimalPoint = true;
-        } else if (!std::isdigit(str[i])) {
+        } else if (!std::isdigit(token[i])) {
             return false;
         }
     }
 
-    // Ensure the string is not just a decimal point
-    if (str.size() == 1 && str == ".")
+    // Ensure the token is not just a decimal point
+    if (token.size() == 1 && token == ".")
         return false;
 
     return true;
@@ -130,15 +130,29 @@ void analyzeLine(const std::string& line, std::ofstream& outfile) {
         // Check if token is a literal string
         if (token.front() == '"') {
             std::string literal = token;
+            bool isTerminated = false;
 
-            while (literal.back() != '"') {
+            while (ss) {
+                if (literal.back() == '"') {
+                    isTerminated = true;
+                    break;
+                }
+
                 std::string nextPart;
-                ss >> nextPart;
+                if (!(ss >> nextPart)) {
+                    break; // End of stream, exit the loop
+                }
                 literal += " " + nextPart;
             }
 
-            token = literal;
-            outfile << formatOutput("LITERAL_STRING", token);
+            if (!isTerminated) {
+                std::cerr << "Error: Unterminated string literal" << std::endl;
+                outfile << formatOutput("LEXICAL_ERROR", "Unterminated string literal");
+            } else {
+                token = literal;
+                outfile << formatOutput("LITERAL_STRING", token);
+            }
+
             continue;
         }
 
@@ -176,7 +190,7 @@ void analyzeLine(const std::string& line, std::ofstream& outfile) {
         if (token == "#") {
             std::string comment;
             std::getline(ss, comment);
-            outfile << formatOutput("COMMENT", token);
+            outfile << formatOutput("COMMENT", comment);
             break;
         }
 
@@ -185,6 +199,7 @@ void analyzeLine(const std::string& line, std::ofstream& outfile) {
             outfile << formatOutput("IDENTIFIER", token);
             continue;
         } else {
+            std::cerr << "Error: Unkown token: " << token << std::endl;
             outfile << formatOutput("LEXICAL_ERROR", token);
         }
     }
@@ -210,7 +225,7 @@ int main() {
         return 1;
     }
 
-    std::cout << "[STARTING PROGRAM...]\n";
+    std::cout << "[READING...]\n";
     outfile << "[\n";
 
     std::string line;
@@ -218,10 +233,11 @@ int main() {
         analyzeLine(line, outfile);
     }
 
-    std::cout << "[READING FINISHED, OUTPUT FILE " << fileName << ".krn READY!]\n";
     outfile << "\n]";
     inputFile.close();
     outfile.close();
+
+    std::cout << "[READING FINISHED, OUTPUT FILE " << fileName << ".krn READY!]\n";
 
     return 0;
 }
