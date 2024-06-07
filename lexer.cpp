@@ -55,6 +55,8 @@ std::unordered_map<std::string, std::string> symbols = {
         {"*>>*", "ASSIGN"},
 };
 
+int errorCount = 0;
+
 bool isIdentifier(const std::string& token) {
     if (token.empty() || !std::isalpha(token[0]))
         return false;
@@ -110,9 +112,9 @@ std::string formatOutput(const std::string& type, const std::string& value) {
     std::string formattedOutput;
 
     formattedOutput.append(R"(  {"type": ")")
-                        .append(type)
-                            .append(R"(", "value": ")")
-                                .append(value).append("\"}");
+            .append(type)
+            .append(R"(", "value": ")")
+            .append(value).append("\"}");
 
     if (value != "%:!")
         formattedOutput.append(",").append("\n");
@@ -121,7 +123,38 @@ std::string formatOutput(const std::string& type, const std::string& value) {
     return formattedOutput;
 }
 
-void analyzeLine(const std::string& line, std::ofstream& outfile) {
+bool processLiteralString(std::string& token, std::stringstream& ss, int& lineCount, std::ofstream& outfile ) {
+    std::string literal = token;
+    bool isTerminated = false;
+
+    while (ss) {
+        if (literal.back() == '"') {
+            isTerminated = true;
+            break;
+        }
+
+        std::string nextPart;
+        if (!(ss >> nextPart)) {
+            break; // End of stream, exit the loop
+        }
+        literal += " " + nextPart;
+    }
+
+    if (!isTerminated) {
+        std::cerr << "[ERROR: UNTERMINATED STRING LITERAL AT LINE "
+                  << lineCount << "]" << std::endl;
+
+        outfile << formatOutput("LEXICAL_ERROR", "Unterminated string literal");
+        errorCount++;
+    } else {
+        token = literal;
+        outfile << formatOutput("LITERAL_STRING", token);
+    }
+
+    return isTerminated;
+}
+
+void analyzeLine(const std::string& line, std::ofstream& outfile, int& lineCount) {
     std::string separatedLine = separateSymbols(line);
     std::stringstream ss(separatedLine);
     std::string token;
@@ -129,31 +162,9 @@ void analyzeLine(const std::string& line, std::ofstream& outfile) {
     while (ss >> token) {
         // Check if token is a literal string
         if (token.front() == '"') {
-            std::string literal = token;
-            bool isTerminated = false;
-
-            while (ss) {
-                if (literal.back() == '"') {
-                    isTerminated = true;
-                    break;
-                }
-
-                std::string nextPart;
-                if (!(ss >> nextPart)) {
-                    break; // End of stream, exit the loop
-                }
-                literal += " " + nextPart;
+            if (processLiteralString(token, ss, lineCount, outfile)) {
+                continue;
             }
-
-            if (!isTerminated) {
-                std::cerr << "Error: Unterminated string literal" << std::endl;
-                outfile << formatOutput("LEXICAL_ERROR", "Unterminated string literal");
-            } else {
-                token = literal;
-                outfile << formatOutput("LITERAL_STRING", token);
-            }
-
-            continue;
         }
 
         // Check if token is a keyword
@@ -199,14 +210,19 @@ void analyzeLine(const std::string& line, std::ofstream& outfile) {
             outfile << formatOutput("IDENTIFIER", token);
             continue;
         } else {
-            std::cerr << "Error: Unkown token: " << token << std::endl;
+            std::cerr << "[ERROR: UNKNOW TOKEN AT LINE " << lineCount
+                      << ": " << token << "]" << std::endl;
+
             outfile << formatOutput("LEXICAL_ERROR", token);
+
+            errorCount++;
         }
     }
 }
 
 int main() {
     std::string fileName;
+    int lineCount = 1;
 
     std::cout << "Type the input file name: ";
     std::cin >> fileName;
@@ -214,30 +230,34 @@ int main() {
     // Open input file
     std::ifstream inputFile(fileName);
     if (!inputFile.is_open()) {
-        std::cerr << "Error opening input file.\n";
+        std::cerr << "[ERROR OPENING INPUT FILE]" << std::endl;
         return 1;
     }
 
     // Open output file
     std::ofstream outfile(fileName + ".krn");
     if (!outfile.is_open()) {
-        std::cerr << "Error opening output file.\n";
+        std::cerr << "[ERROR OPENING OUTPUT FILE]" << std::endl;
         return 1;
     }
 
-    std::cout << "[READING...]\n";
-    outfile << "[\n";
+    std::cout << "[READING INPUT FILE...]" << std::endl << std::endl;
+    outfile << "[" << std::endl;
+
+    std::cout << "[ERRORS]:" << std::endl;
 
     std::string line;
     while (std::getline(inputFile, line)) {
-        analyzeLine(line, outfile);
+        analyzeLine(line, outfile, lineCount);
+        lineCount++;
     }
 
-    outfile << "\n]";
+    outfile << std::endl << "]";
     inputFile.close();
     outfile.close();
 
-    std::cout << "[READING FINISHED, OUTPUT FILE " << fileName << ".krn READY!]\n";
+    std::cout << std::endl << "[READING FINISHED, OUTPUT FILE " << fileName << ".krn READY!]" << std::endl;
+    std::cout << "[PROGRAM FINISHED WITH " << errorCount << " ERRORS!]" << std::endl;
 
     return 0;
 }
